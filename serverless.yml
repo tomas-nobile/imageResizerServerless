@@ -1,0 +1,123 @@
+service: ${self:custom.serviceName}
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${self:custom.stage}
+  iam:
+    role: LambdaRole
+
+functions:
+  validateImageFunction:
+    name: ${self:custom.validateImageFunctionName}${self:custom.stage}
+    handler: functions/${self:custom.validateImageFunctionName}/index.handler
+    memorySize: 128
+    timeout: 5
+    # package:
+    #   individually: true
+    #   include:
+    #     - functions/${self:custom.validateImageFunctionName}
+    lambdaAtEdge:
+        distribution: 'CloudFrontDistribution'
+        eventType: 'viewer-request'
+
+  authenticateFunction:
+    name: ${self:custom.authenticateFunctionName}${self:custom.stage}
+    handler: functions/${self:custom.authenticateFunctionName}/index.handler
+    # package:
+    #   individually: true
+    #   include:
+    #     - functions/${self:custom.authenticateFunctionName}
+    # lambdaAtEdge:
+    #     distribution: 'CloudFrontDistribution'
+    #     eventType: 'origin-request'
+
+  resizeImageFunction:
+    name: ${self:custom.resizeImageFunctionName}${self:custom.stage}
+    handler: functions/${self:custom.resizeImageFunctionName}/index.handler
+    # package:
+    #   individually: true
+    # lambdaAtEdge:
+    #     distribution: 'CloudFrontDistribution'
+    #     eventType: 'origin-response'
+
+resources:
+  Resources:
+    ImagesS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          DefaultCacheBehavior:
+            ForwardedValues:
+              QueryString: 'false'
+              Cookies:
+                Forward: none
+            AllowedMethods:
+            - HEAD
+            - DELETE
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - PATCH
+            TargetOriginId: ImagesS3BucketOrigin
+            ViewerProtocolPolicy: redirect-to-https
+          Origins:
+          - DomainName: bucket.s3.amazonaws.com
+            Id: ImagesS3BucketOrigin
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  - ''
+                  -
+                    - 'origin-access-identity/cloudfront/'
+                    - Ref: cloudfrontoriginaccessidentity                
+          Enabled: true         
+
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref ImagesS3Bucket
+        PolicyDocument:
+          ${file(./policies/s3BucketPolicy.yml)}
+
+    cloudfrontoriginaccessidentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: "Cloudfront dist's OAI"
+    
+    LambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: lambdaRole-${self:custom.serviceName}${self:custom.stage}
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: 
+                - lambda.amazonaws.com
+                - edgelambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: lambdaPolicy-${self:custom.serviceName}${self:custom.stage}
+            PolicyDocument:
+              ${file(./policies/lambdaPolicy.yml)}
+
+
+plugins:
+   - '@silvermine/serverless-plugin-cloudfront-lambda-edge'
+
+custom:
+  stage: ${opt:stage, '4uat'}
+  serviceName: image-resizer
+  bucketName: sinapsis-images-nobile${self:custom.stage}
+  validateImageFunctionName: validateImage
+  authenticateFunctionName: authenticate
+  resizeImageFunctionName: resizeImage

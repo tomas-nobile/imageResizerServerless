@@ -1,0 +1,392 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "The AWS CloudFormation template for this Serverless application",
+  "Resources": {
+    "ServerlessDeploymentBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ServerlessDeploymentBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ValidateImageFunctionLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/validateImage4uat"
+      }
+    },
+    "AuthenticateFunctionLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/authenticate4uat"
+      }
+    },
+    "ResizeImageFunctionLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/resizeImage4uat"
+      }
+    },
+    "ValidateImageFunctionLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/image-resizer/4uat/1688748731088-2023-07-07T16:52:11.088Z/image-resizer.zip"
+        },
+        "Handler": "functions/validateImage/index.handler",
+        "Runtime": "nodejs18.x",
+        "FunctionName": "validateImage4uat",
+        "MemorySize": 128,
+        "Timeout": 5,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaRole",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "ValidateImageFunctionLogGroup",
+        "LambdaRole"
+      ]
+    },
+    "AuthenticateFunctionLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/image-resizer/4uat/1688748731088-2023-07-07T16:52:11.088Z/image-resizer.zip"
+        },
+        "Handler": "functions/authenticate/index.handler",
+        "Runtime": "nodejs18.x",
+        "FunctionName": "authenticate4uat",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaRole",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "AuthenticateFunctionLogGroup",
+        "LambdaRole"
+      ]
+    },
+    "ResizeImageFunctionLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/image-resizer/4uat/1688748731088-2023-07-07T16:52:11.088Z/image-resizer.zip"
+        },
+        "Handler": "functions/resizeImage/index.handler",
+        "Runtime": "nodejs18.x",
+        "FunctionName": "resizeImage4uat",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaRole",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "ResizeImageFunctionLogGroup",
+        "LambdaRole"
+      ]
+    },
+    "ValidateImageFunctionLambdaVersionsO5cOZICWgPvBteJ76DN9yHL5wG0lWqm4j8wDJMy3X4": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ValidateImageFunctionLambdaFunction"
+        },
+        "CodeSha256": "TIBxhtPHIwcQjZFPOdaORNFpOHIHQGUDcmjm9K2ahHc="
+      }
+    },
+    "AuthenticateFunctionLambdaVersion3DuqiYqhuyJqmovqlH2bAsd3ghDwStVr5woUngJhQnU": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "AuthenticateFunctionLambdaFunction"
+        },
+        "CodeSha256": "TIBxhtPHIwcQjZFPOdaORNFpOHIHQGUDcmjm9K2ahHc="
+      }
+    },
+    "ResizeImageFunctionLambdaVersionNdrp7kCslYPQT3K6Wm2fmM3PMzpi9of3S6qFpghgYQ": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ResizeImageFunctionLambdaFunction"
+        },
+        "CodeSha256": "TIBxhtPHIwcQjZFPOdaORNFpOHIHQGUDcmjm9K2ahHc="
+      }
+    },
+    "ImagesS3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "sinapsis-images-nobile4uat"
+      }
+    },
+    "CloudFrontDistribution": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "DefaultCacheBehavior": {
+            "ForwardedValues": {
+              "QueryString": "false",
+              "Cookies": {
+                "Forward": "none"
+              }
+            },
+            "AllowedMethods": [
+              "HEAD",
+              "DELETE",
+              "POST",
+              "GET",
+              "OPTIONS",
+              "PUT",
+              "PATCH"
+            ],
+            "TargetOriginId": "ImagesS3BucketOrigin",
+            "ViewerProtocolPolicy": "redirect-to-https",
+            "LambdaFunctionAssociations": [
+              {
+                "EventType": "viewer-request",
+                "IncludeBody": false,
+                "LambdaFunctionARN": {
+                  "Ref": "ValidateImageFunctionLambdaVersionsO5cOZICWgPvBteJ76DN9yHL5wG0lWqm4j8wDJMy3X4"
+                }
+              }
+            ]
+          },
+          "Origins": [
+            {
+              "DomainName": "bucket.s3.amazonaws.com",
+              "Id": "ImagesS3BucketOrigin",
+              "S3OriginConfig": {
+                "OriginAccessIdentity": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "origin-access-identity/cloudfront/",
+                      {
+                        "Ref": "cloudfrontoriginaccessidentity"
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "Enabled": true
+        }
+      }
+    },
+    "BucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ImagesS3Bucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Sid": "PublicReadGetObject",
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+              ],
+              "Resource": "arn:aws:s3:::sinapsis-images-nobile4uat/*",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceArn": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudfront::692748077510:distribution/",
+                          {
+                            "Fn::GetAtt": [
+                              "CloudFrontDistribution",
+                              "Id"
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "cloudfrontoriginaccessidentity": {
+      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+      "Properties": {
+        "CloudFrontOriginAccessIdentityConfig": {
+          "Comment": "Cloudfront dist's OAI"
+        }
+      }
+    },
+    "LambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "lambdaRole-image-resizer4uat",
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "edgelambda.amazonaws.com"
+                ]
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "lambdaPolicy-image-resizer4uat",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "s3:GetObject",
+                  "Resource": "arn:aws:s3:::sinapsis-images-nobile4uat/*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "ServerlessDeploymentBucketName": {
+      "Value": {
+        "Ref": "ServerlessDeploymentBucket"
+      },
+      "Export": {
+        "Name": "sls-image-resizer-4uat-ServerlessDeploymentBucketName"
+      }
+    },
+    "ValidateImageFunctionLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "ValidateImageFunctionLambdaVersionsO5cOZICWgPvBteJ76DN9yHL5wG0lWqm4j8wDJMy3X4"
+      },
+      "Export": {
+        "Name": "sls-image-resizer-4uat-ValidateImageFunctionLambdaFunctionQualifiedArn"
+      }
+    },
+    "AuthenticateFunctionLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "AuthenticateFunctionLambdaVersion3DuqiYqhuyJqmovqlH2bAsd3ghDwStVr5woUngJhQnU"
+      },
+      "Export": {
+        "Name": "sls-image-resizer-4uat-AuthenticateFunctionLambdaFunctionQualifiedArn"
+      }
+    },
+    "ResizeImageFunctionLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "ResizeImageFunctionLambdaVersionNdrp7kCslYPQT3K6Wm2fmM3PMzpi9of3S6qFpghgYQ"
+      },
+      "Export": {
+        "Name": "sls-image-resizer-4uat-ResizeImageFunctionLambdaFunctionQualifiedArn"
+      }
+    }
+  }
+}
