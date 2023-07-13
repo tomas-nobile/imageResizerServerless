@@ -4,6 +4,7 @@
 
 # Dependencies
 node_modules/
+functions/resizeImage/node_modules/
 
 # Build output
 dist/
