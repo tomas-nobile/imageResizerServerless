@@ -1,6 +1,6 @@
 # Image Resizer
 ## Setup
-1. Set "region" and "accountNumber" properties on ./config.json 
+1. Set "region" and "accountNumber" properties values on ./config.json 
 2. Run command "sls deploy"
 
 ## Testing
