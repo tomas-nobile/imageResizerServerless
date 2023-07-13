@@ -1,46 +1,60 @@
 service: ${self:custom.serviceName}
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs18.x
-  region: us-east-1
+  region: ${self:custom.region}
   stage: ${self:custom.stage}
   iam:
     role: LambdaRole
 
 functions:
-  validateImageFunction:
-    name: ${self:custom.validateImageFunctionName}${self:custom.stage}
-    handler: functions/${self:custom.validateImageFunctionName}/index.handler
-    memorySize: 128
+  requestValidationFunction:
+    name: ${self:custom.requestValidationFunctionName}
+    handler: functions/requestValidation/index.handler
     timeout: 5
-    # package:
-    #   individually: true
-    #   include:
-    #     - functions/${self:custom.validateImageFunctionName}
+    memorySize: 128
+    package:
+      patterns:
+        - 'config.json'
+        - common/**
+        - functions/requestValidation/**
     lambdaAtEdge:
         distribution: 'CloudFrontDistribution'
         eventType: 'viewer-request'
-
-  authenticateFunction:
-    name: ${self:custom.authenticateFunctionName}${self:custom.stage}
-    handler: functions/${self:custom.authenticateFunctionName}/index.handler
-    # package:
-    #   individually: true
-    #   include:
-    #     - functions/${self:custom.authenticateFunctionName}
-    # lambdaAtEdge:
-    #     distribution: 'CloudFrontDistribution'
-    #     eventType: 'origin-request'
-
+  responseFunction:
+    name: ${self:custom.responseFunctionName}
+    handler: functions/response/index.handler
+    timeout: 5
+    memorySize: 128
+    package:
+      patterns:
+        - 'config.json'
+        - common/**
+        - functions/response/**
+    lambdaAtEdge:
+        distribution: 'CloudFrontDistribution'
+        eventType: 'origin-response'
   resizeImageFunction:
-    name: ${self:custom.resizeImageFunctionName}${self:custom.stage}
-    handler: functions/${self:custom.resizeImageFunctionName}/index.handler
-    # package:
-    #   individually: true
-    # lambdaAtEdge:
-    #     distribution: 'CloudFrontDistribution'
-    #     eventType: 'origin-response'
+    name: ${self:custom.resizeImageFunctionName}
+    handler: functions/resizeImage/index.handler
+    memorySize: 3000
+    timeout: 30
+    package:
+      patterns:
+        - 'config.json'
+        - common/**
+        - functions/resizeImage/**
+    events:
+      - s3:
+          existing: true
+          bucket: !Ref ImagesS3Bucket
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: images/
 
 resources:
   Resources:
@@ -67,17 +81,13 @@ resources:
             - PUT
             - PATCH
             TargetOriginId: ImagesS3BucketOrigin
-            ViewerProtocolPolicy: redirect-to-https
+            ViewerProtocolPolicy: allow-all
           Origins:
-          - DomainName: bucket.s3.amazonaws.com
+          - DomainName: ${self:custom.bucketName}.s3.amazonaws.com
             Id: ImagesS3BucketOrigin
             S3OriginConfig:
-              OriginAccessIdentity:
-                Fn::Join:
-                  - ''
-                  -
-                    - 'origin-access-identity/cloudfront/'
-                    - Ref: cloudfrontoriginaccessidentity                
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id             
           Enabled: true         
 
     BucketPolicy:
@@ -87,12 +97,15 @@ resources:
         PolicyDocument:
           ${file(./policies/s3BucketPolicy.yml)}
 
-    cloudfrontoriginaccessidentity:
-      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    OriginAccessControl:
+      Type: AWS::CloudFront::OriginAccessControl
       Properties:
-        CloudFrontOriginAccessIdentityConfig:
-          Comment: "Cloudfront dist's OAI"
-    
+        OriginAccessControlConfig:
+          Name: ${self:custom.serviceName}${self:custom.stage}
+          OriginAccessControlOriginType: s3
+          SigningBehavior: always
+          SigningProtocol: sigv4
+
     LambdaRole:
       Type: AWS::IAM::Role
       Properties:
@@ -110,14 +123,23 @@ resources:
             PolicyDocument:
               ${file(./policies/lambdaPolicy.yml)}
 
-
 plugins:
-   - '@silvermine/serverless-plugin-cloudfront-lambda-edge'
+  - '@silvermine/serverless-plugin-cloudfront-lambda-edge'	
+  - 'serverless-plugin-typescript'
+  - serverless-plugin-common-excludes # this should go before serverless-plugin-include-dependencies
+  - serverless-plugin-include-dependencies
+
 
 custom:
-  stage: ${opt:stage, '4uat'}
+  dotenv:
+    path: ./config.json
+    include:
+      - main
+  stage: ${opt:stage, '-gamma'}
   serviceName: image-resizer
   bucketName: sinapsis-images-nobile${self:custom.stage}
-  validateImageFunctionName: validateImage
-  authenticateFunctionName: authenticate
-  resizeImageFunctionName: resizeImage
+  requestValidationFunctionName: requestValidation${self:custom.stage}
+  resizeImageFunctionName: resizeImage${self:custom.stage}
+  responseFunctionName: response${self:custom.stage}
+  region: ${file(./config.json):main.region}
+  accountNumber: ${file(./config.json):main.accountNumber}

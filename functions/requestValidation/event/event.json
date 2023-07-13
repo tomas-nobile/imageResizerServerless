@@ -1,0 +1,78 @@
+{
+    "Records": [
+        {
+            "cf": {
+                "config": {
+                    "distributionDomainName": "d1fuv954db666l.cloudfront.net",
+                    "distributionId": "ETFJ4QK4YA1N5",
+                    "eventType": "origin-request",
+                    "requestId": "ekaDtFqCupx4unI0duQV1Hj90c6peEtBfT_ggGGClAdH_77N4qMxqw=="
+                },
+                "request": {
+                    "clientIp": "190.17.145.200",
+                    "headers": {
+                        "host": [
+                            {
+                                "key": "Host",
+                                "value": "sinapsis-images-nobile-uatm.s3.amazonaws.com"
+                            }
+                        ],
+                        "x-forwarded-for": [
+                            {
+                                "key": "X-Forwarded-For",
+                                "value": "190.17.145.200"
+                            }
+                        ],
+                        "user-agent": [
+                            {
+                                "key": "User-Agent",
+                                "value": "Amazon CloudFront"
+                            }
+                        ],
+                        "via": [
+                            {
+                                "key": "Via",
+                                "value": "1.1 9c6de11d0b917abf4e6f3a73e9b03f5a.cloudfront.net (CloudFront)"
+                            }
+                        ],
+                        "content-length": [
+                            {
+                                "key": "Content-Length",
+                                "value": "259000"
+                            }
+                        ],
+                        "postman-token": [
+                            {
+                                "key": "Postman-Token",
+                                "value": "b359f492-75c3-4572-88a3-f12236359fe6"
+                            }
+                        ],
+                        "accept-encoding": [
+                            {
+                                "key": "Accept-Encoding",
+                                "value": "gzip, deflate, br"
+                            }
+                        ],
+                        "content-type": [
+                            {
+                                "key": "Content-Type",
+                                "value": "image/jpeg"
+                            }
+                        ]
+                    },
+                    "method": "PUT",
+                    "origin": {
+                        "s3": {
+                            "authMethod": "none",
+                            "customHeaders": {},
+                            "domainName": "sinapsis-images-nobile-uatm.s3.amazonaws.com",
+                            "path": ""
+                        }
+                    },
+                    "querystring": "",
+                    "uri": "/images/tomas.e.nobile/index-400x200.jpg"
+                }
+            }
+        }
+    ]
+}

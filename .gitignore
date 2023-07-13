@@ -1,0 +1,21 @@
+# Serverless Framework
+.serverless/
+.env
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# IDE and editor files
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Serverless Framework plugins and cache
+.sls-cache/

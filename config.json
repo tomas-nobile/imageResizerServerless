@@ -1,0 +1,34 @@
+{
+    "main":{
+        "region":"us-east-1",
+        "accountNumber":"692748077510",
+        "dimenToResize":[
+            {
+                "width":400,
+                "height":200
+            },
+            {
+                "width":160,
+                "height":120
+            },
+            {
+                "width":120,
+                "height":120
+            }
+        ],
+        "pathToUploadImg": "imagesResized/"
+
+    },
+    "requestValidation":{
+        "imageTypesSupported" : ["image/jpeg", "image/png"],
+        "imageSizeSupported": 11000000
+    },
+    "resizeImage":{
+        "pathOriginalImg": "images/",
+        "contentTypes":{
+            "jpg": "image/jpeg",
+            "png": "image/png"
+        }
+    }
+
+}

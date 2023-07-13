@@ -4,11 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:validate": "serverless invoke local -f requestValidationFunction -p functions/requestValidation/event/event.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@silvermine/serverless-plugin-cloudfront-lambda-edge": "2.2.3"
+    "@silvermine/serverless-plugin-cloudfront-lambda-edge": "2.2.3",
+    "serverless-plugin-common-excludes": "^4.0.0",
+    "serverless-plugin-include-dependencies": "^5.1.0",
+    "serverless-plugin-typescript": "^2.1.5",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.367.0",
+    "jimp": "^0.22.8"
   }
 }

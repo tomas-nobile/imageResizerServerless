@@ -1,0 +1,73 @@
+{
+	"info": {
+		"_postman_id": "9416ca2b-9079-4b2f-8785-c73afcc7cdc9",
+		"name": "Sinapsis",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "PostImage",
+			"protocolProfileBehavior": {
+				"strictSSL": false,
+				"followRedirects": true,
+				"followOriginalHttpMethod": false
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/C:/Users/tomas.e.nobile/Downloads/index.160x120.jpg"
+					}
+				},
+				"url": {
+					"raw": "d3ud6enqy0zrps.cloudfront.net/images/tomas.e.nobile/test.jpg",
+					"host": [
+						"d3ud6enqy0zrps",
+						"cloudfront",
+						"net"
+					],
+					"path": [
+						"images",
+						"tomas.e.nobile",
+						"test.jpg"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "d3ud6enqy0zrps.cloudfront.net/imagesResized/images/tomas.e.nobile/test160x120.jpg",
+					"host": [
+						"d3ud6enqy0zrps",
+						"cloudfront",
+						"net"
+					],
+					"path": [
+						"imagesResized",
+						"images",
+						"tomas.e.nobile",
+						"test160x120.jpg"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

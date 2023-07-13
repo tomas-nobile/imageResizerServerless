@@ -1,15 +1,16 @@
 Statement:
-  - Sid: PublicReadGetObject
+  - Sid: GetPutObject
     Effect: Allow
-    Principal: '*'
+    Principal:
+      Service: cloudfront.amazonaws.com
     Action:
       - s3:GetObject
       - s3:PutObject
     Resource: arn:aws:s3:::${self:custom.bucketName}/*
     Condition:
       StringEquals:
-        aws:SourceArn:
+        AWS:SourceArn:
           - !Join
             - ''
-            - - 'arn:aws:cloudfront::692748077510:distribution/'
+            - - 'arn:aws:cloudfront::${self:custom.accountNumber}:distribution/'
               - !GetAtt CloudFrontDistribution.Id
